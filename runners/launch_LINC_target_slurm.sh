@@ -52,7 +52,7 @@ export LINC_ROOT
 
 DATA_DIR=$1
 
-bash \$FLOCS_ROOT/runners/run_LINC_target_HBA.sh -d \$DATA_DIR -s \$CONTAINER -b /cosma8,/cosma/apps -r \$WORKDIR -l \$LINC_ROOT -f \$FLOCS_ROOT -c $ACTUAL_CALSOLS -t $SKYMODEL
+bash \$FLOCS_ROOT/runners/run_LINC_target_HBA.sh -d \$DATA_DIR -s \$CONTAINER -b /cosma8,/cosma/apps -r \$WORKDIR -l \$LINC_ROOT -f \$FLOCS_ROOT -c $ACTUAL_CALSOLS -t $SKYMODEL -e"--selfcal=True --gsmcal_step=scalarphase"
 
 cp -r \$WORKDIR/\${OBSID}_LINC_target \$OUTPUT_DIR/
 EOT
