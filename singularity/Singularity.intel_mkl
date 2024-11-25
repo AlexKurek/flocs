@@ -97,6 +97,8 @@ From: fedora:38
 	dnf -y update
     dnf -y install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
     dnf -y install $(</opt/lofar/packages.txt)
+    wget https://download.oracle.com/otn_software/linux/instantclient/2360000/oracle-instantclient-basic-23.6.0.24.10-1.el9.x86_64.rpm
+    dnf -y install oracle-instantclient-basic-23.6.0.24.10-1.el9.x86_64.rpm
     # Necessary for nomacs
     sudo strip --remove-section=.note.ABI-tag /usr/lib64/libQt5Core.so.5
 
@@ -190,6 +192,7 @@ EOF
     #
     # Setup the Python environment.
     #
+    sudo dnf -y install python3-cx-oracle
     wget https://raw.githubusercontent.com/tikk3r/flocs/fedora-py3/requirements3.txt -O $INSTALLDIR/requirements3.txt
     pip --version
     pip install --upgrade "setuptools>=v74.0.0 "
@@ -207,7 +210,7 @@ EOF
     pip install --upgrade pip wheel "Cython==0.29.30"
     pip install "numpy==1.26.2"
     pip install --no-binary pandas 'pandas==2.0.0'
-    pip install h5py
+    pip install --no-binary h5py h5py
     pip install -r $INSTALLDIR/requirements3.txt
     pip install lofar-h5plot
     pip install legacystamps
@@ -224,7 +227,7 @@ EOF
     wget https://lta.lofar.eu/software/lofar_lta-2.8.0.tar.gz
     tar xf lofar_lta-*
     cd lofar_lta-2.8.0
-    python setup.py install_oracle
+    #python setup.py install_oracle
     python setup.py install
     cd ..
     rm lofar_lta*.tar.gz
@@ -565,10 +568,6 @@ EOF
     cd $INSTALLDIR
     wget https://raw.githubusercontent.com/rvweeren/lofar_facet_selfcal/main/sub-sources-outside-region.py -O /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
     chmod 755 /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
-    sed -i "s/np\.float/np\.float_/" /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
-    sed -i "s/(np\.int)[^0-9]/np\.int_/g" /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
-    grep -rl "np.int" /opt/lofar/ddf-pipeline/utils | xargs sed -i "s/(np\.int)[^0-9]/np\.int_/g"
-    #grep -rl "np.bool" /opt/lofar/ddf-pipeline/utils | xargs sed -i "s/np\.bool/np\.bool_/g"
 
     #
     # Install lotss-query
