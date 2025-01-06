@@ -360,7 +360,6 @@ From: fedora:40
         cmake $CMAKE_ADD_OPTION -DOpenBLAS_LIB=/opt/OpenBLAS/lib64/libopenblas.so \
             -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/sagecal \
             -DLIB_ONLY=True \
-            -Wno-dev \
             -DCMAKE_CXX_FLAGS='-g0' -DCMAKE_C_FLAGS='-g0' -DCMAKE_Fortran_FLAGS='-g0' \
             -DHAVE_CUDA=ON \
             ../src
@@ -368,7 +367,6 @@ From: fedora:40
         cmake $CMAKE_ADD_OPTION -DOpenBLAS_LIB=/opt/OpenBLAS/lib64/libopenblas.so \
             -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/sagecal \
             -DLIB_ONLY=True \
-            -Wno-dev \
             -DCMAKE_CXX_FLAGS='-g0' -DCMAKE_C_FLAGS='-g0' -DCMAKE_Fortran_FLAGS='-g0' \
             ../src
     fi
@@ -794,4 +792,4 @@ From: fedora:40
     To enter a shell within the image, use
         apptainer shell -B <paths,that,need,to,be,accessible> <path to image>
 
-    The container base is Fedora 39.
+    The container base is Fedora 40.

@@ -330,7 +330,6 @@ EOF
         cmake $CMAKE_ADD_OPTION -DOpenBLAS_LIB=/opt/OpenBLAS/lib64/libopenblas.so \
             -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/sagecal \
             -DLIB_ONLY=True \
-            -Wno-dev \
             -DCMAKE_CXX_FLAGS='-g0' -DCMAKE_C_FLAGS='-g0' -DCMAKE_Fortran_FLAGS='-g0' \
             -DHAVE_CUDA=ON \
             ../src
@@ -338,7 +337,6 @@ EOF
         cmake $CMAKE_ADD_OPTION -DOpenBLAS_LIB=/opt/OpenBLAS/lib64/libopenblas.so \
             -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/sagecal \
             -DLIB_ONLY=True \
-            -Wno-dev \
             -DCMAKE_CXX_FLAGS='-g0' -DCMAKE_C_FLAGS='-g0' -DCMAKE_Fortran_FLAGS='-g0' \
             ../src
     fi
@@ -710,7 +708,11 @@ EOF
 
     echo "measures.directory: $INSTALLDIR/casacore/data" > $INSTALLDIR/.casarc 
     echo export CASARCFILES=\$INSTALLDIR/.casarc >> $INSTALLDIR/init.sh
-    echo export LD_LIBRARY_PATH=/opt/intel/oneapi/mkl/latest/lib/intel64/:/opt/intel/oneapi/compiler/latest/lib/:/opt/intel/oneapi/tbb/latest/env/../lib/intel64/gcc4.8:\$LD_LIBRARY_PATH >> $INSTALLDIR/init.sh
+    if [ $HAS_MKL = true ]; then
+        echo export MKLROOT=/opt/intel/oneapi/mkl/latest >> $INSTALLDIR/init.sh
+        echo export PATH=/opt/intel/oneapi/mkl/latest/bin:\$PATH >> $INSTALLDIR/init.sh
+        echo export LD_LIBRARY_PATH=/opt/intel/oneapi/mkl/latest/lib:\$LD_LIBRARY_PATH >> $INSTALLDIR/init.sh
+    fi
 
 
     echo "# DDF environment settings" >> $INSTALLDIR/init.sh
@@ -744,4 +746,4 @@ EOF
     To enter a shell within the image, use
         apptainer shell -B <paths,that,need,to,be,accessible> <path to image>
 
-    The container base is Fedora 39.
+    The container base is Fedora 40.
