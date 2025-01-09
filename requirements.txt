@@ -3,7 +3,7 @@ aplpy
 asn1crypto
 astLib
 astropy-healpix
-astropy>6
+astropy
 astroquery
 atomicwrites
 attrs
