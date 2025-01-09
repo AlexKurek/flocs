@@ -53,6 +53,7 @@ From: fedora:40
     export MKL_NUM_THREADS=1
     export NUM_THREADS=128
     export OPENBLAS_TARGET={{ OPENBLASTARGET }}
+    export BIGNUMA=0
 
     if [ $NOAVX512 = true ]; then
         export CFLAGS="-w -march=${MARCH} -mtune=${MTUNE} -mno-avx512f"
@@ -105,7 +106,7 @@ From: fedora:40
     git clone https://github.com/xianyi/OpenBLAS.git src
     cd src && git checkout $OPENBLAS_VERSION
     mkdir build && cd build
-    cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=/opt/OpenBLAS -DTARGET=$OPENBLAS_TARGET -DUSE_THREAD=1 -DNUM_THREADS=256 -DNUM_CORES=256 -DBUILD_SHARED_LIBS=ON -DNO_AVX512=$NOAVX512 ..
+    cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=/opt/OpenBLAS -DTARGET=$OPENBLAS_TARGET -DUSE_THREAD=1 -DNUM_THREADS=256 -DNUM_CORES=256 -DBUILD_SHARED_LIBS=ON -DBIGNUMA=$BIGNUMA -DNO_AVX512=$NOAVX512 ..
     make -j$J
     make install
     rm -rf /opt/OpenBLAS/src
@@ -678,6 +679,7 @@ EOF
     echo export NCPU=\$\(nproc\) >> $INSTALLDIR/init.sh
     echo export OPENBLAS_NUM_THREADS=1 >> $INSTALLDIR/init.sh
     echo export OPENBLAS_MAX_THREADS=\$NCPU >> $INSTALLDIR/init.sh
+    echo export BIGNUMA=\${BIGNUMA} >> $INSTALLDIR/init.sh
     echo export OMP_NUM_THREADS=\$NCPU >> $INSTALLDIR/init.sh
     echo export OMP_MAX_THREADS=\$NCPU >> $INSTALLDIR/init.sh
     echo export HAS_CUDA=$HAS_CUDA >> $INSTALLDIR/init.sh
