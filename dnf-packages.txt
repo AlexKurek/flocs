@@ -34,6 +34,7 @@ gsl-devel
 gtkmm30-devel
 hostname
 htop
+ImageMagick*
 lapack-devel
 libaio
 libaio-devel
@@ -49,10 +50,10 @@ lua
 lua-devel
 lzma
 make
+mariadb
 mariadb-devel
-mysql
-mysql-devel
 nano
+ncftp
 ncurses
 ncurses-devel
 nodejs
