@@ -240,7 +240,43 @@ From: fedora:40
     rm -rf datashape-0.5.2/
 
     pip install --upgrade pip wheel Cython
-    pip install "numpy<2"
+    # pip install "numpy<2"
+
+
+
+    # https://stackoverflow.com/questions/78469558/how-can-i-select-the-aocl-blis-lapack-libraries-for-building-numpy-on-windows-10
+tee > /tmp/AOCL-LibBlis.pc << EOF
+libdir=/opt/aocl/4.0/lib 
+includedir=/opt/aocl/4.0/include
+version= 4.0                    
+Name: AOCL-LibBlis
+Description: AOCL Perf Libraries
+Version: ${version}
+Cflags: -I${includedir}
+Libs: -L${libdir} -lAOCL-LibBlis
+EOF
+    sudo mv /tmp/AOCL-LibBlis.pc /opt/aocl/4.0/lib/pkgconfig/
+
+
+tee > /tmp/AOCL-LibFlame.pc << EOF
+libdir=/opt/aocl/4.0/lib 
+includedir=/opt/aocl/4.0/include
+version= 4.0                    
+Name: AOCL-LibFlame
+Description: AOCL LibFlame Perf Libraries
+Version: ${version}
+Cflags: -I${includedir}
+Libs: -L${libdir} -lAOCL-LibFlame
+EOF
+    sudo mv /tmp/AOCL-LibFlame.pc /opt/aocl/4.0/lib/pkgconfig/
+
+    export PKG_CONFIG_PATH=/opt/aocl/4.0/lib/pkgconfig/
+
+
+
+
+
+
     pip install --no-binary pandas pandas
     pip install --no-binary h5py h5py
     pip install -r $INSTALLDIR/flocs/requirements.txt
