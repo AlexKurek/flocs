@@ -279,7 +279,7 @@ EOF
     tar xvzf numpy-1.26.4.tar.gz
     rm numpy-1.26.4.tar.gz
     cd numpy-1.26.4/
-    python -m pip install . -Csetup-args=-Dblas-order=AOCL-LibBlis,openblas -Csetup-args=-Dlapack-order=AOCL-LibFlame,openblas
+    python -m pip install . -Csetup-args=-Dblas-order=AOCL-BLAS,openblas -Csetup-args=-Dlapack-order=AOCL-LAPACK,openblas
     cd ..
     rm -rf numpy-1.26.4/
 
@@ -287,7 +287,7 @@ EOF
     tar xvzf scipy-1.15.1.tar.gz
     rm scipy-1.15.1.tar.gz
     cd scipy-1.15.1/
-    python -m pip install . -Csetup-args=-Dblas=AOCL-LibBlis -Csetup-args=-Dlapack=AOCL-LibFlame
+    python -m pip install . -Csetup-args=-Dblas=AOCL-BLAS -Csetup-args=-Dlapack=AOCL-LAPACK
     cd ..
     rm -rf scipy-1.15.1/
 
