@@ -240,7 +240,7 @@ From: fedora:40
     rm -rf datashape-0.5.2/
 
     pip install --upgrade pip wheel Cython
-    # pip install "numpy<2"
+    pip install "numpy<2"
 
 
 
