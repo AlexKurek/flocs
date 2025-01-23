@@ -240,38 +240,56 @@ From: fedora:40
     rm -rf datashape-0.5.2/
 
     pip install --upgrade pip wheel Cython
-    pip install "numpy<2"
+    # pip install "numpy<2"
 
 
 
     # https://stackoverflow.com/questions/78469558/how-can-i-select-the-aocl-blis-lapack-libraries-for-building-numpy-on-windows-10
-tee > /tmp/AOCL-LibBlis.pc << EOF
+tee > /tmp/AOCL-BLAS.pc << EOF
 libdir=/opt/aocl/4.0/lib 
 includedir=/opt/aocl/4.0/include
 version= 4.0                    
-Name: AOCL-LibBlis
+Name: AOCL-BLAS
 Description: AOCL Perf Libraries
 Version: ${version}
 Cflags: -I${includedir}
-Libs: -L${libdir} -lAOCL-LibBlis
+Libs: -L${libdir} -lAOCL-BLAS
 EOF
-    sudo mv /tmp/AOCL-LibBlis.pc /opt/aocl/4.0/lib/pkgconfig/
+    sudo mv /tmp/AOCL-BLAS.pc /opt/aocl/4.0/lib/pkgconfig/
 
 
-tee > /tmp/AOCL-LibFlame.pc << EOF
+tee > /tmp/AOCL-LAPACK.pc << EOF
 libdir=/opt/aocl/4.0/lib 
 includedir=/opt/aocl/4.0/include
 version= 4.0                    
-Name: AOCL-LibFlame
-Description: AOCL LibFlame Perf Libraries
+Name: AOCL-LAPACK
+Description: AOCL-LAPACK Perf Libraries
 Version: ${version}
 Cflags: -I${includedir}
-Libs: -L${libdir} -lAOCL-LibFlame
+Libs: -L${libdir} -lAOCL-LAPACK
 EOF
-    sudo mv /tmp/AOCL-LibFlame.pc /opt/aocl/4.0/lib/pkgconfig/
+    sudo mv /tmp/AOCL-LAPACK.pc /opt/aocl/4.0/lib/pkgconfig/
 
     export PKG_CONFIG_PATH=/opt/aocl/4.0/lib/pkgconfig/
-    pkg-config --list-all
+    pkg-config --libs AOCL-BLAS
+    pkg-config --libs AOCL-LAPACK
+
+
+    wget https://github.com/numpy/numpy/releases/download/v1.26.4/numpy-1.26.4.tar.gz
+    tar xvzf numpy-1.26.4.tar.gz
+    rm numpy-1.26.4.tar.gz
+    cd numpy-1.26.4/
+    python -m pip install . -Csetup-args=-Dblas-order=AOCL-LibBlis,openblas -Csetup-args=-Dlapack-order=AOCL-LibFlame,openblas
+    cd ..
+    rm -rf numpy-1.26.4/
+
+    wget https://github.com/scipy/scipy/releases/download/v1.15.1/scipy-1.15.1.tar.gz
+    tar xvzf scipy-1.15.1.tar.gz
+    rm scipy-1.15.1.tar.gz
+    cd scipy-1.15.1/
+    python -m pip install . -Csetup-args=-Dblas=AOCL-LibBlis -Csetup-args=-Dlapack=AOCL-LibFlame
+    cd ..
+    rm -rf scipy-1.15.1/
 
 
 
