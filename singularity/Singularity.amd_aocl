@@ -275,7 +275,7 @@ EOF
 
 
     wget https://github.com/numpy/numpy/releases/download/v1.26.4/numpy-1.26.4.tar.gz
-    tar xvzf numpy-1.26.4.tar.gz
+    tar xzf numpy-1.26.4.tar.gz
     rm numpy-1.26.4.tar.gz
     cd numpy-1.26.4/
     python -m pip install . -Csetup-args=-Dblas-order=AOCL-BLAS,openblas -Csetup-args=-Dlapack-order=AOCL-LAPACK,openblas
@@ -283,7 +283,7 @@ EOF
     rm -rf numpy-1.26.4/
 
     wget https://github.com/scipy/scipy/releases/download/v1.15.1/scipy-1.15.1.tar.gz
-    tar xvzf scipy-1.15.1.tar.gz
+    tar xzf scipy-1.15.1.tar.gz
     rm scipy-1.15.1.tar.gz
     cd scipy-1.15.1/
     python -m pip install . -Csetup-args=-Dblas=AOCL-BLAS -Csetup-args=-Dlapack=AOCL-LAPACK
