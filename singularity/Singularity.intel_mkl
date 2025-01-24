@@ -29,9 +29,8 @@ From: fedora:40
     export EVERYBEAM_VERSION=65685cba
     export HDF5_VERSION=1.14.5
     export IDG_VERSION=2af6f285
-    export LAPACK_VERSION=3.8.0
     export LOSOTO_VERSION=latest
-    export OPENBLAS_VERSION=v0.3.28
+    export OPENBLAS_VERSION=v0.3.29
     export PYBDSF_VERSION=8471637
     export PYTHON_CASACORE_VERSION=3.6.1
     export RMEXTRACT_VERSION=0.5.0
@@ -51,7 +50,7 @@ From: fedora:40
     export OMP_MAX_THREADS=1
     export OPENBLAS_NUM_THREADS=1
     export MKL_NUM_THREADS=1
-    export NUM_THREADS=128
+    export NUM_THREADS=256
     export OPENBLAS_TARGET={{ OPENBLASTARGET }}
 
     if [ $NOAVX512 = true ]; then
@@ -94,10 +93,6 @@ From: fedora:40
     export cmake=`which cmake`
     export CC=`which gcc`
     export CXX=`which g++`
-
-    mkdir -p $INSTALLDIR/patches
-    cd $INSTALLDIR && git clone --single-branch -b fedora-py3 https://github.com/tikk3r/flocs.git
-    mv $INSTALLDIR/flocs/patches/* $INSTALLDIR/patches/
     
     # Install OpenBLAS
     mkdir -p /opt/OpenBLAS
@@ -105,7 +100,7 @@ From: fedora:40
     git clone https://github.com/xianyi/OpenBLAS.git src
     cd src && git checkout $OPENBLAS_VERSION
     mkdir build && cd build
-    cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=/opt/OpenBLAS -DTARGET=$OPENBLAS_TARGET -DUSE_THREAD=1 -DNUM_THREADS=256 -DNUM_CORES=256 -DBUILD_SHARED_LIBS=ON -DNO_AVX512=$NOAVX512 ..
+    cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=/opt/OpenBLAS -DTARGET=$OPENBLAS_TARGET -DUSE_THREAD=1 -DNUM_THREADS=$NUM_THREADS -DNUM_CORES=$NUM_THREADS -DBUILD_SHARED_LIBS=ON -DNO_AVX512=$NOAVX512 ..
     make -j$J
     make install
     rm -rf /opt/OpenBLAS/src
@@ -280,22 +275,35 @@ EOF
     mkdir -p ${INSTALLDIR}/casacore/build
     mkdir -p ${INSTALLDIR}/casacore/data
     cd $INSTALLDIR/casacore
-    git clone https://github.com/casacore/casacore.git src
+    git clone --depth 1 https://github.com/casacore/casacore.git src
     cd ${INSTALLDIR}/casacore/src && git checkout tags/${CASACORE_VERSION} && echo export CASACORE_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
     cd ${INSTALLDIR}/casacore/data
     ncftpget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar
     tar xf WSRT_Measures.ztar && rm WSRT_Measures.ztar
     cd ${INSTALLDIR}/casacore/build
-    cmake $CMAKE_ADD_OPTION \
-        -DCMAKE_INSTALL_PREFIX=${INSTALLDIR}/casacore/ \
-        -DDATA_DIR=${INSTALLDIR}/casacore/data \
-        -DBUILD_PYTHON=False \
-        -DUSE_OPENMP=True \
-        -DUSE_HDF5=True \
-        -DBUILD_PYTHON3=True \
-        -DBUILD_DYSCO=OFF \
-        -DBLAS_LIBRARIES=/opt/OpenBLAS/lib64/libopenblas.so \
-        ../src/ 
+    if [ $HAS_MKL = true ]; then
+        cmake $CMAKE_ADD_OPTION \
+            -DCMAKE_INSTALL_PREFIX=${INSTALLDIR}/casacore/ \
+            -DDATA_DIR=${INSTALLDIR}/casacore/data \
+            -DBUILD_PYTHON=False \
+            -DUSE_OPENMP=True \
+            -DUSE_HDF5=True \
+            -DBUILD_PYTHON3=True \
+            -DBUILD_DYSCO=OFF \
+            -DBLA_VENDOR=Intel10_64lp \
+            ../src
+    else
+        cmake $CMAKE_ADD_OPTION \
+            -DCMAKE_INSTALL_PREFIX=${INSTALLDIR}/casacore/ \
+            -DDATA_DIR=${INSTALLDIR}/casacore/data \
+            -DBUILD_PYTHON=False \
+            -DUSE_OPENMP=True \
+            -DUSE_HDF5=True \
+            -DBUILD_PYTHON3=True \
+            -DBUILD_DYSCO=OFF \
+            -DBLAS_LIBRARIES=/opt/OpenBLAS/lib64/libopenblas.so \
+            ../src
+    fi
     cd ${INSTALLDIR}/casacore/build && make -s -j ${J}
     cd ${INSTALLDIR}/casacore/build && make install
     cd $INSTALLDIR
@@ -332,8 +340,7 @@ EOF
     git clone https://github.com/nlesc-dirac/sagecal.git src
     cd build
     if [ $HAS_MKL = true ]; then
-        cmake $CMAKE_ADD_OPTION -DOpenBLAS_LIB=/opt/OpenBLAS/lib64/libopenblas.so \
-            -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/sagecal \
+        cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/sagecal \
             -DLIB_ONLY=True \
             -DBLA_VENDOR=Intel10_64lp \
             ../src
@@ -431,7 +438,7 @@ EOF
     # Install DP3
     #
     mkdir -p $INSTALLDIR/DP3/build
-    git clone https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
+    git clone --depth 1 https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
     cd $INSTALLDIR/DP3/src
     git checkout ${DP3_VERSION}
     echo export DP3_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
@@ -510,11 +517,6 @@ EOF
     ls ${INSTALLDIR}
     
     # Setup DDF
-    export PATCH_KILLMS_MAKEFILE_PREDICT=$INSTALLDIR/patches/killms_predict.patch
-    export PATCH_KILLMS_MAKEFILE_ARRAY=$INSTALLDIR/patches/killms_array.patch
-    export PATCH_KILLMS_MAKEFILE_GRIDDER=$INSTALLDIR/patches/killms_gridder.patch
-    export PATCH_DDFACET_CPUS=$INSTALLDIR/patches/DDFacet_cpus.patch
-
     pip --no-cache-dir install meqtrees-cattery --no-deps
     pip --no-cache-dir install owlcat --no-deps
 
@@ -618,8 +620,8 @@ EOF
     #wget --progress=bar:force:noscroll https://lambda.gsfc.nasa.gov/data/foregrounds/tgss_adr/TGSSADR1_7sigma_catalog.fits
     wget --progress=bar:force:noscroll http://tgssadr.strw.leidenuniv.nl/catalogs/TGSSADR1_7sigma_catalog.fits
     cd $INSTALLDIR
-    wget https://raw.githubusercontent.com/rvweeren/lofar_facet_selfcal/main/sub-sources-outside-region.py -O /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
-    chmod 755 /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
+    rm /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
+    ln -s `which sub-sources-outside-region` /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
 
     sed -i 's/SafeConfigParser/ConfigParser/g' /opt/lofar/ddf-pipeline/utils/options.py
 
@@ -649,6 +651,7 @@ EOF
     #
     # Install custom runners
     #
+    cd $INSTALLDIR && git clone --single-branch -b fedora-py3 https://github.com/tikk3r/flocs.git
     mkdir -p /opt/lofar/runners
     cd /opt/lofar/
     cp flocs/runners/run* ./runners/
