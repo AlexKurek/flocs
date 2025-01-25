@@ -245,28 +245,7 @@ From: fedora:40
 
 
     # https://stackoverflow.com/questions/78469558/how-can-i-select-the-aocl-blis-lapack-libraries-for-building-numpy-on-windows-10
-tee > /tmp/AOCL-BLAS.pc << EOF
-libdir=/opt/aocl/4.0/lib 
-includedir=/opt/aocl/4.0/include
-version= 4.0                    
-Name: AOCL-BLAS
-Description: AOCL-BLAS Perf Libraries
-Version: ${version}
-Cflags: -I${includedir}
-Libs: -L${libdir} -lAOCL-BLAS
-EOF
 
-
-tee > /tmp/AOCL-LAPACK.pc << EOF
-libdir=/opt/aocl/4.0/lib 
-includedir=/opt/aocl/4.0/include
-version= 4.0                    
-Name: AOCL-LAPACK
-Description: AOCL-LAPACK Perf Libraries
-Version: ${version}
-Cflags: -I${includedir}
-Libs: -L${libdir} -lAOCL-LAPACK
-EOF
 
     sudo mv -t /opt/aocl/4.0/lib/pkgconfig/ /tmp/AOCL-BLAS.pc /tmp/AOCL-LAPACK.pc
     export PKG_CONFIG_PATH=/opt/aocl/4.0/lib/pkgconfig/
