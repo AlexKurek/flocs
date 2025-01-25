@@ -246,7 +246,9 @@ From: fedora:40
 
     # https://stackoverflow.com/questions/78469558/how-can-i-select-the-aocl-blis-lapack-libraries-for-building-numpy-on-windows-10
 
-
+    wget -P /tmp/ \
+        https://raw.githubusercontent.com/AlexKurek/flocs/refs/heads/numpy-and-scipy-against-aocl/pkgconfig/AOCL-BLAS.pc \
+        https://raw.githubusercontent.com/AlexKurek/flocs/refs/heads/numpy-and-scipy-against-aocl/pkgconfig/AOCL-LAPACK.pc
     sudo mv -t /opt/aocl/4.0/lib/pkgconfig/ /tmp/AOCL-BLAS.pc /tmp/AOCL-LAPACK.pc
     export PKG_CONFIG_PATH=/opt/aocl/4.0/lib/pkgconfig/
     pkg-config --libs AOCL-BLAS
