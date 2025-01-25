@@ -5,4 +5,4 @@ Name: AOCL-LAPACK
 Description: AOCL-LAPACK Perf Libraries
 Version: ${version}
 Cflags: -I${includedir}
-Libs: -L${libdir} -lAOCL-LAPACK
+Libs: -L${libdir} -lflame

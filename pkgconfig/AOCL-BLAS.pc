@@ -5,4 +5,4 @@ Name: AOCL-BLAS
 Description: AOCL-BLAS Perf Libraries
 Version: ${version}
 Cflags: -I${includedir}
-Libs: -L${libdir} -lAOCL-BLAS
+Libs: -L${libdir} -lblis
