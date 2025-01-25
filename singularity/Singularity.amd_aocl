@@ -706,7 +706,6 @@ From: fedora:40
     echo export INSTALLDIR=$INSTALLDIR >> $INSTALLDIR/init.sh
     echo source \$INSTALLDIR/pyenv-py3/bin/activate >> $INSTALLDIR/init.sh
     echo source /opt/aocl/5.0.0/aocc/amd-libs.cfg >> $INSTALLDIR/init.sh
-    echo export HDF5_USE_FILE_LOCKING=FALSE >> $INSTALLDIR/init.sh
     echo export PYTHONPATH=\$INSTALLDIR/VLBI-cwl/scripts:\$INSTALLDIR/LINC/scripts:\$INSTALLDIR/lofar/lib64/python$PYTHON_VERSION/site-packages:\$INSTALLDIR/DP3/lib/python$PYTHON_VERSION/site-packages:\$INSTALLDIR/DP3/usermodules:\$INSTALLDIR/EveryBeam/lib64/python$PYTHON_VERSION/site-packages:\$PYTHONPATH >> $INSTALLDIR/init.sh
     echo export PYTHONPATH=\$INSTALLDIR/aoflagger/lib:\$PYTHONPATH >> $INSTALLDIR/init.sh
     # echo export PATH=/opt/montage/Montage-6.0/bin:\$PATH  >> $INSTALLDIR/init.sh
