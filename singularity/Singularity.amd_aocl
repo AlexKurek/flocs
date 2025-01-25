@@ -304,7 +304,7 @@ From: fedora:40
     mkdir -p ${INSTALLDIR}/casacore/build
     mkdir -p ${INSTALLDIR}/casacore/data
     cd $INSTALLDIR/casacore
-    git clone --depth 1 https://github.com/casacore/casacore.git src
+    git clone --single-branch https://github.com/casacore/casacore.git src
     cd ${INSTALLDIR}/casacore/src && git checkout tags/${CASACORE_VERSION} && echo export CASACORE_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
     cd ${INSTALLDIR}/casacore/data
     ncftpget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar
@@ -448,7 +448,7 @@ From: fedora:40
     # Install DP3
     #
     mkdir -p $INSTALLDIR/DP3/build
-    git clone --depth 1 https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
+    git clone --single-branch https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
     cd $INSTALLDIR/DP3/src
     git checkout ${DP3_VERSION}
     echo export DP3_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
