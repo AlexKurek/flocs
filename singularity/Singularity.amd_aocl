@@ -92,10 +92,6 @@ From: fedora:40
     export make=`which make`
     export cmake=`which cmake`
 
-    mkdir -p $INSTALLDIR/patches
-    cd $INSTALLDIR && git clone --single-branch -b fedora-py3 https://github.com/tikk3r/flocs.git
-    mv $INSTALLDIR/flocs/patches/* $INSTALLDIR/patches/
-    
     # Install OpenBLAS
     mkdir -p /opt/OpenBLAS
     cd /opt/OpenBLAS
@@ -308,7 +304,7 @@ From: fedora:40
     mkdir -p ${INSTALLDIR}/casacore/build
     mkdir -p ${INSTALLDIR}/casacore/data
     cd $INSTALLDIR/casacore
-    git clone https://github.com/casacore/casacore.git src
+    git clone --depth 1 https://github.com/casacore/casacore.git src
     cd ${INSTALLDIR}/casacore/src && git checkout tags/${CASACORE_VERSION} && echo export CASACORE_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
     cd ${INSTALLDIR}/casacore/data
     ncftpget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar
@@ -419,7 +415,6 @@ From: fedora:40
         -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/EveryBeam \
         -DBUILD_WITH_PYTHON=ON \
         -DFFTW3F_LIBRARY="${AOCL_ROOT}/lib/libfftw3f.so" \
-        -DLAPACK_LIBRARIES="${AOCL_ROOT}/lib/libflame.so" \
         -DCMAKE_CXX_FLAGS="-L${AOCL_ROOT}/lib -lamdlibm -lm -O3 -Ofast" \
         -DCMAKE_C_FLAGS="-L${AOCL_ROOT}/lib -lamdlibm -lm -O3 -Ofast" \
         -DBLA_VENDOR=AOCL_mt \
@@ -453,7 +448,7 @@ From: fedora:40
     # Install DP3
     #
     mkdir -p $INSTALLDIR/DP3/build
-    git clone https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
+    git clone --depth 1 https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
     cd $INSTALLDIR/DP3/src
     git checkout ${DP3_VERSION}
     echo export DP3_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
@@ -550,11 +545,6 @@ From: fedora:40
     ls ${INSTALLDIR}
     
     # Setup DDF
-    export PATCH_KILLMS_MAKEFILE_PREDICT=$INSTALLDIR/patches/killms_predict.patch
-    export PATCH_KILLMS_MAKEFILE_ARRAY=$INSTALLDIR/patches/killms_array.patch
-    export PATCH_KILLMS_MAKEFILE_GRIDDER=$INSTALLDIR/patches/killms_gridder.patch
-    export PATCH_DDFACET_CPUS=$INSTALLDIR/patches/DDFacet_cpus.patch
-
     pip --no-cache-dir install meqtrees-cattery --no-deps
     pip --no-cache-dir install owlcat --no-deps
 
@@ -566,6 +556,7 @@ From: fedora:40
     cd $INSTALLDIR/LOFARBeam
     git clone https://github.com/lofar-astron/LOFARBeam.git src
     cd src
+    sed -i "s/-std=c++11/-std=${CPPSTD}/" CMakeLists.txt
     echo export LOFARBEAM_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
     cd ../build
     # Install in the existing lofar python folder
@@ -653,8 +644,8 @@ From: fedora:40
     #wget --progress=bar:force:noscroll https://lambda.gsfc.nasa.gov/data/foregrounds/tgss_adr/TGSSADR1_7sigma_catalog.fits
     wget --progress=bar:force:noscroll http://tgssadr.strw.leidenuniv.nl/catalogs/TGSSADR1_7sigma_catalog.fits
     cd $INSTALLDIR
-    wget https://raw.githubusercontent.com/rvweeren/lofar_facet_selfcal/main/sub-sources-outside-region.py -O /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
-    chmod 755 /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
+    rm /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
+    ln -s `which sub-sources-outside-region` /opt/lofar/ddf-pipeline/scripts/sub-sources-outside-region.py
 
     sed -i 's/SafeConfigParser/ConfigParser/g' /opt/lofar/ddf-pipeline/utils/options.py
 
@@ -684,6 +675,7 @@ From: fedora:40
     #
     # Install custom runners
     #
+    cd $INSTALLDIR && git clone --single-branch -b fedora-py3 https://github.com/tikk3r/flocs.git
     mkdir -p /opt/lofar/runners
     cd /opt/lofar/
     cp flocs/runners/run* ./runners/
