@@ -254,8 +254,9 @@ From: fedora:40
     tar xzf numpy-1.26.4.tar.gz
     rm numpy-1.26.4.tar.gz
     cd numpy-1.26.4/
-    pip install . -Csetup-args=-Dblas-order=AOCL-BLAS,openblas -Csetup-args=-Dlapack-order=AOCL-LAPACK,openblas
+    pip install . -Csetup-args=-Dblas-order=AOCL-BLAS,openblas -Csetup-args=-Dlapack-order=AOCL-LAPACK,openblas -Csetup-args=-Db_lto=true
     if [ $DEBUG = true ]; then
+        pip install pyyaml
         python -c 'import numpy; numpy.show_config()'
     fi
     cd ..
@@ -265,8 +266,9 @@ From: fedora:40
     tar xzf scipy-1.15.1.tar.gz
     rm scipy-1.15.1.tar.gz
     cd scipy-1.15.1/
-    pip install . -Csetup-args=-Dblas=AOCL-BLAS -Csetup-args=-Dlapack=AOCL-LAPACK
+    pip install . -Csetup-args=-Dblas=AOCL-BLAS -Csetup-args=-Dlapack=AOCL-LAPACK -Csetup-args=-Db_lto=true
     if [ $DEBUG = true ]; then
+        pip install pyyaml
         python -c 'import numpy; numpy.show_config()'
     fi
     cd ..
