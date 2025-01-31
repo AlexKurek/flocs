@@ -22,11 +22,10 @@ From: fedora:40
 
     # Settings relevant to the installed software.
     export AOFLAGGER_VERSION=bdf03b28
-    export CASACORE_VERSION=v3.6.1
+    export CASACORE_VERSION=b027afe
     export DDFPIPELINE_VERSION=df58808
-    export DP3_VERSION=48e75b34
-    export DYSCO_VERSION=682fe5
-    export EVERYBEAM_VERSION=65685cba
+    export DP3_VERSION=9b237dc0
+    export EVERYBEAM_VERSION=59c755a6
     export HDF5_VERSION=1.14.5
     export IDG_VERSION=2af6f285
     export LOSOTO_VERSION=latest
@@ -34,7 +33,7 @@ From: fedora:40
     export PYBDSF_VERSION=8471637
     export PYTHON_CASACORE_VERSION=3.6.1
     export RMEXTRACT_VERSION=0.5.0
-    export WSCLEAN_VERSION=443bd576
+    export WSCLEAN_VERSION=a2b1077d
     export HDF5_USE_FILE_LOCKING=FALSE
     export OMPI_ALLOW_RUN_AS_ROOT=1
 
@@ -67,8 +66,8 @@ From: fedora:40
     else
         export CMAKE_ADD_OPTION="-Wno-dev"
     fi
-    export CPLUS_INCLUDE_PATH="/opt/hdf5/include:/opt/OpenBLAS/include:/usr/include/openmpi-x86_64:/usr/include/c++/14:/usr/include/python${PYTHON_VERSION}:$INSTALLDIR/casacore/include:/usr/include/boost:/usr/include/cfitsio:$INSTALLDIR/idg/include:$INSTALLDIR/EveryBeam/include:/usr/include/wcslib:/usr/include/freetype2/freetype:/usr/include/freetype2/freetype/config"
-    export CPATH="/usr/include/python${PYTHON_VERSION}:/opt/hdf5/include:/opt/OpenBLAS/include:/usr/include/openmpi-x86_64/:/usr/local/cuda/include:${INSTALLDIR}/casacore/include:$INSTALLDIR/idg/include:$INSTALLDIR/aoflagger/include:$INSTALLDIR/EveryBeam/include:/usr/include/wcslib:/usr/include/freetype2/freetype/config"
+    export CPLUS_INCLUDE_PATH="/opt/intel/oneapi/mkl/latest/include/fftw/:/opt/hdf5/include:/opt/OpenBLAS/include:/usr/include/openmpi-x86_64:/usr/include/c++/14:/usr/include/python${PYTHON_VERSION}:$INSTALLDIR/casacore/include:/usr/include/boost:/usr/include/cfitsio:$INSTALLDIR/idg/include:$INSTALLDIR/EveryBeam/include:/usr/include/wcslib:/usr/include/freetype2/freetype:/usr/include/freetype2/freetype/config"
+    export CPATH="/opt/intel/oneapi/mkl/latest/include/fftw/:/usr/include/python${PYTHON_VERSION}:/opt/hdf5/include:/opt/OpenBLAS/include:/usr/include/openmpi-x86_64/:/usr/local/cuda/include:${INSTALLDIR}/casacore/include:$INSTALLDIR/idg/include:$INSTALLDIR/aoflagger/include:$INSTALLDIR/EveryBeam/include:/usr/include/wcslib:/usr/include/freetype2/freetype/config"
     export CMAKE_PREFIX_PATH="/opt/hdf5:/opt/OpenBLAS:$INSTALLDIR/aoflagger:$INSTALLDIR/casacore:$INSTALLDIR/lofar:$INSTALLDIR/idg:/usr/lib64/openmpi:$INSTALLDIR/EveryBeam"
     export LD_LIBRARY_PATH="/opt/hdf5/lib:$INSTALLDIR/lofarstman/lib64:/opt/OpenBLAS/lib64:$INSTALLDIR/aoflagger/lib:$INSTALLDIR/casacore/lib:$INSTALLDIR/idg/lib:/usr/lib64/openmpi/lib/:$INSTALLDIR/EveryBeam/lib:$INSTALLDIR/sagecal/lib:$LD_LIBRARY_PATH"
     export PATH="/opt/hdf5/bin:/usr/lib64/openmpi/bin:$PATH"
@@ -89,8 +88,6 @@ From: fedora:40
     # Necessary for nomacs
     sudo strip --remove-section=.note.ABI-tag /usr/lib64/libQt5Core.so.5
 
-    export make=`which make`
-    export cmake=`which cmake`
     export CC=`which gcc`
     export CXX=`which g++`
     
@@ -148,6 +145,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 EOF
         sudo mv /tmp/oneAPI.repo /etc/yum.repos.d/
         dnf -y install intel-oneapi-mkl intel-oneapi-mkl-devel
+        source /opt/intel/oneapi/mkl/latest/env/vars.sh
     fi
 
     if [ $HAS_CUDA = true ]; then
@@ -173,7 +171,11 @@ EOF
     cd $INSTALLDIR
     git clone https://github.com/JohannesBuchner/MultiNest
     cd MultiNest/build
-    cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/MultiNest ..
+    if [ $HAS_MKL = true ]; then
+        cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/MultiNest -DBLA_VENDOR=Intel10_64lp ..
+    else
+        cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/MultiNest ..
+    fi
     make
     cd $INSTALLDIR
 
@@ -186,13 +188,18 @@ EOF
     pip install --upgrade setuptools
     pip --no-cache-dir install virtualenv
 
+    # Install shadeMS in its own environment to avoid conflicts.
+    virtualenv $INSTALLDIR/pyenv-shadeMS --python=python3
+    # Without this strange bash errors appear with singularity shell from apptainer with 1.1.6-1.el8.
+    printf "unset \$PROMPT_COMMAND\n$(cat $INSTALLDIR/pyenv-py3/bin/activate)" > $INSTALLDIR/pyenv-shadeMS/bin/activate
+    source $INSTALLDIR/pyenv-shadeMS/bin/activate
+    pip install shadems
+
+    # Install the normal Python environment.
     virtualenv $INSTALLDIR/pyenv-py3 --python=python3
     # Without this strange bash errors appear with singularity shell from apptainer with 1.1.6-1.el8.
     printf "unset \$PROMPT_COMMAND\n$(cat $INSTALLDIR/pyenv-py3/bin/activate)" > $INSTALLDIR/pyenv-py3/bin/activate
     source $INSTALLDIR/pyenv-py3/bin/activate
-    if [ $HAS_MKL = true ]; then
-        source /opt/intel/oneapi/mkl/latest/env/vars.sh
-    fi
 
     wget --progress=bar:force:noscroll https://github.com/blaze/datashape/archive/refs/tags/0.5.2.tar.gz
     tar -xzvf 0.5.2.tar.gz
@@ -275,7 +282,7 @@ EOF
     mkdir -p ${INSTALLDIR}/casacore/build
     mkdir -p ${INSTALLDIR}/casacore/data
     cd $INSTALLDIR/casacore
-    git clone --depth 1 https://github.com/casacore/casacore.git src
+    git clone https://github.com/casacore/casacore.git src
     cd ${INSTALLDIR}/casacore/src && git checkout tags/${CASACORE_VERSION} && echo export CASACORE_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
     cd ${INSTALLDIR}/casacore/data
     ncftpget ftp://anonymous@ftp.astron.nl/outgoing/Measures/WSRT_Measures.ztar
@@ -289,7 +296,7 @@ EOF
             -DUSE_OPENMP=True \
             -DUSE_HDF5=True \
             -DBUILD_PYTHON3=True \
-            -DBUILD_DYSCO=OFF \
+            -DBUILD_DYSCO=ON \
             -DBLA_VENDOR=Intel10_64lp \
             ../src
     else
@@ -300,7 +307,7 @@ EOF
             -DUSE_OPENMP=True \
             -DUSE_HDF5=True \
             -DBUILD_PYTHON3=True \
-            -DBUILD_DYSCO=OFF \
+            -DBUILD_DYSCO=ON \
             -DBLAS_LIBRARIES=/opt/OpenBLAS/lib64/libopenblas.so \
             ../src
     fi
@@ -317,21 +324,6 @@ EOF
     pip uninstall -y python-casacore
     pip install --no-deps --no-binary python-casacore "python-casacore==${PYTHON_CASACORE_VERSION}"
     
-    #
-    # Install Dysco
-    #
-    mkdir -p $INSTALLDIR/dysco/build
-    cd $INSTALLDIR/dysco && git clone https://github.com/aroffringa/dysco.git src
-    cd src && git checkout $DYSCO_VERSION && echo export DYSCO_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
-    if [ $MARCH = 'x86-64' ] && [ $MTUNE = 'generic' ]; then
-        cd $INSTALLDIR/dysco/build && cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/dysco -DCASACORE_ROOT_DIR=$INSTALLDIR/casacore -DPORTABLE=True ../src && make -s -j $J && make install
-    else
-        cd $INSTALLDIR/dysco/build && cmake $CMAKE_ADD_OPTION -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/dysco -DCASACORE_ROOT_DIR=$INSTALLDIR/casacore -DTARGET_CPU=$MARCH -DPORTABLE=False ../src && make -s -j $J && make install
-    fi
-    cd $INSTALLDIR
-    rm -rf $INSTALLDIR/dysco/build
-    rm -rf $INSTALLDIR/dysco/src
-
     #
     # Install SAGECal
     #
@@ -438,7 +430,7 @@ EOF
     # Install DP3
     #
     mkdir -p $INSTALLDIR/DP3/build
-    git clone --depth 1 https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
+    git clone https://git.astron.nl/RD/DP3.git $INSTALLDIR/DP3/src
     cd $INSTALLDIR/DP3/src
     git checkout ${DP3_VERSION}
     echo export DP3_VERSION=$(git rev-parse --short HEAD) >> $INSTALLDIR/init.sh
@@ -562,6 +554,7 @@ EOF
     git clone https://github.com/saopicc/DDFacet.git
     cd DDFacet
     git checkout 5cec4db8 
+    patch -u DDFacet/Other/AsyncProcessPool.py -i $INSTALLDIR/flocs/patches/DDFacet_cpus.patch
     cd ..
     ## Strip out version requirements.
     sed -i 's/<=.*"/"/' DDFacet/pyproject.toml
@@ -684,6 +677,7 @@ EOF
     ln -s $INSTALLDIR/pyenv-py3/bin/h5plot /usr/bin/h5plot
 
     # Store version information.
+    echo export FLOCS_VERSION=5.5.0 >> $INSTALLDIR/init.sh
     echo export LOSOTO_VERSION=$LOSOTO_VERSION >> $INSTALLDIR/init.sh
     echo export OPENBLAS_VERSION=$OPENBLAS_VERSION >> $INSTALLDIR/init.sh
     echo export RMEXTRACT_VERSION=$RMEXTRACT_VERSION >> $INSTALLDIR/init.sh
@@ -704,7 +698,6 @@ EOF
     echo export PATH=\$INSTALLDIR/ds9/bin:\$PATH >> $INSTALLDIR/init.sh
     echo export PATH=\$INSTALLDIR/DP3/bin:\$PATH  >> $INSTALLDIR/init.sh
     echo export PATH=\$INSTALLDIR/difmap/uvf_difmap:\$PATH >> $INSTALLDIR/init.sh
-    echo export PATH=\$INSTALLDIR/dysco/bin:\$PATH  >> $INSTALLDIR/init.sh
     echo export PATH=/opt/hdf5/bin:\$PATH  >> $INSTALLDIR/init.sh
     echo export PATH=\$INSTALLDIR/sagecal/bin:\$PATH  >> $INSTALLDIR/init.sh
     echo export PATH=\$INSTALLDIR/wsclean/bin:\$PATH  >> $INSTALLDIR/init.sh
@@ -714,7 +707,7 @@ EOF
     echo export PATH=\$INSTALLDIR/MultiNest/bin:\$PATH >> $INSTALLDIR/init.sh
     echo export PATH=/usr/lib64/openmpi/bin:\$PATH >> $INSTALLDIR/init.sh
     echo export PATH=\$INSTALLDIR/VLBI-cwl/scripts:\$PATH >> $INSTALLDIR/init.sh
-    echo export LD_LIBRARY_PATH=\$INSTALLDIR/aoflagger/lib:\$INSTALLDIR/casacore/lib:\$INSTALLDIR/DP3/lib:\$INSTALLDIR/dysco/lib:\$INSTALLDIR/EveryBeam/lib:/opt/hdf5/lib:\$INSTALLDIR/idg/lib:\$INSTALLDIR/lofar/lib:\$INSTALLDIR/lofar/lib64:\$LD_LIBRARY_PATH  >> $INSTALLDIR/init.sh
+    echo export LD_LIBRARY_PATH=\$INSTALLDIR/aoflagger/lib:\$INSTALLDIR/casacore/lib:\$INSTALLDIR/DP3/lib:\$INSTALLDIR/EveryBeam/lib:/opt/hdf5/lib:\$INSTALLDIR/idg/lib:\$INSTALLDIR/lofar/lib:\$INSTALLDIR/lofar/lib64:\$LD_LIBRARY_PATH  >> $INSTALLDIR/init.sh
     echo export LD_LIBRARY_PATH=/opt/OpenBLAS/lib64:\$LD_LIBRARY_PATH >> $INSTALLDIR/init.sh
     echo export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib/:\$LD_LIBRARY_PATH >> $INSTALLDIR/init.sh
     echo export LD_LIBRARY_PATH=\$INSTALLDIR/sagecal/lib:\$LD_LIBRARY_PATH >> $INSTALLDIR/init.sh
@@ -774,7 +767,6 @@ EOF
     * Difmap: $INSTALLDIR/difmap
     * DP3: $INSTALLDIR/DP3
     * DS9: $INSTALLDIR/ds9
-    * Dysco: $INSTALLDIR/dysco
     * EveryBeam: $INSTALLDIR/EveryBeam
     * IDG: $INSTALLDIR/idg
     * WSClean: $INSTALLDIR/wsclean
