@@ -547,7 +547,7 @@ EOF
     git clone https://github.com/saopicc/DDFacet.git
     cd DDFacet
     git checkout 5cec4db8
-    patch -u DDFacet/Other/AsyncProcessPool.py -i $INSTALLDIR/flocs/patches/DDFacet_cpus.patch
+    patch -u DDFacet/DDFacet/Other/AsyncProcessPool.py -i $INSTALLDIR/flocs/patches/DDFacet_cpus.patch
     cd ..
     ## Strip out version requirements.
     sed -i 's/<=.*"/"/' DDFacet/pyproject.toml
