@@ -221,7 +221,6 @@ From: fedora:40
     printf "unset \$PROMPT_COMMAND\n$(cat $INSTALLDIR/pyenv-py3/bin/activate)" > $INSTALLDIR/pyenv-shadeMS/bin/activate
     source $INSTALLDIR/pyenv-shadeMS/bin/activate
     pip install shadems
-    deactivate
 
     # Install the normal Python environment.
     virtualenv $INSTALLDIR/pyenv-py3 --python=python3
