@@ -210,8 +210,9 @@ From: fedora:40
     #
     # Setup the Python environment.
     #
+    cd $INSTALLDIR && git clone --single-branch -b fedora-py3 https://github.com/tikk3r/flocs.git
+
     sudo dnf -y install python3-cx-oracle
-    wget https://raw.githubusercontent.com/tikk3r/flocs/fedora-py3/requirements.txt -O $INSTALLDIR/requirements.txt
     pip --version
     pip --no-cache-dir install virtualenv
 
@@ -242,7 +243,7 @@ From: fedora:40
     pip install "numpy<2"
     pip install --no-binary pandas pandas
     pip install --no-binary h5py h5py
-    pip install -r $INSTALLDIR/requirements.txt
+    pip install -r $INSTALLDIR/flocs/requirements.txt
     # Install this separately since it keeps forcefully downgrading numpy.
     pip install --no-deps lofarSun
     pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
@@ -659,7 +660,6 @@ From: fedora:40
     #
     # Install custom runners
     #
-    cd $INSTALLDIR && git clone --single-branch -b fedora-py3 https://github.com/tikk3r/flocs.git
     mkdir -p /opt/lofar/runners
     cd /opt/lofar/
     cp flocs/runners/run* ./runners/
