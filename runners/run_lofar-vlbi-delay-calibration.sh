@@ -78,9 +78,9 @@ export APPTAINER_BINDPATH
 echo "Binding the following paths to the container:"
 sed 's/:/\n/g' <<< "$APPTAINER_BINDPATH"
 
-# Warn on low disk space (< 25 TB).
-reqSpace=15000000000000
-reqSpaceHum=$(echo "scale=1;$reqSpace/1000000000000" | bc -l)T
+# Warn on low disk space (< 15 TB).
+reqSpace=15000000000
+reqSpaceHum=$(echo "scale=1;$reqSpace/1000000000" | bc -l)T
 availSpace=$(df $RUNDIR | awk 'NR==2 { print $4 }')
 availSpaceHum=$(df -H $RUNDIR | awk 'NR==2 { print $4 }')
 if (( availSpace < reqSpace )); then
@@ -216,7 +216,7 @@ else
     pattern="${DATADIR}/*.MS"
     files=( $pattern )
     ms="${files[0]}"  # printf is safer!
-    wget https://raw.githubusercontent.com/LOFAR-VLBI/lofar-vlbi-pipeline/refs/heads/master/plot_field.py
+    wget https://raw.githubusercontent.com/LOFAR-VLBI/lofar-vlbi-pipeline/refs/heads/master/plot_field.py --continue_no_lotss
     singularity exec -B $PWD,$BINDPATHS $SIMG python plot_field.py --MS $ms
 
     git clone https://github.com/tikk3r/flocs.git
