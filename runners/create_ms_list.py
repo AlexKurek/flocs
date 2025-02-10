@@ -632,7 +632,10 @@ def add_arguments_linc_target(parser):
     )
     parser.add_argument("--reference_stationSB", type=int, default=None, help="")
     parser.add_argument(
-        "--ionex_server", type=str, default="ftp://gssc.esa.int/gnss/products/ionex/", help=""
+        "--ionex_server",
+        type=str,
+        default="ftp://gssc.esa.int/gnss/products/ionex/",
+        help="",
     )
     parser.add_argument("--ionex_prefix", type=str, default="UQRG", help="")
     parser.add_argument("--proxy_server", type=str, default=None, help="")
@@ -728,6 +731,18 @@ def add_arguments_linc_target(parser):
         help="Limits the input skymodel to sources that exceed the given flux density limit in Jy (default: None for HBA, i.e. all sources of the catalogue will be kept, and 1.0 for LBA).",
     )
     parser.add_argument(
+        "--output_fullres_data",
+        type=eval_bool,
+        default=False,
+        help="Output the target data at full, unaveraged resolution. This is used, for example, for further VLBI-style processing.",
+    )
+    parser.add_argument(
+        "--calib_nchan",
+        type=int,
+        default=None,
+        help="Number of channels to combine during the phase calibration. 0 means combine all channels.",
+    )
+    parser.add_argument(
         "mspath",
         type=str,
         default="",
@@ -799,13 +814,13 @@ def add_arguments_vlbi_process_ddf(parser):
     parser.add_argument(
         "--h5merger",
         type=cwl_dir,
-        help="External LOFAR helper scripts for merging h5 files."
+        help="External LOFAR helper scripts for merging h5 files.",
     )
     parser.add_argument(
         "--do_subtraction",
         type=bool,
         default=False,
-        help="When set to true, the LoTSS model will be subtracted from the DDF corrected data."
+        help="When set to true, the LoTSS model will be subtracted from the DDF corrected data.",
     )
 
 
@@ -911,7 +926,7 @@ def add_arguments_vlbi_delay_calibrator(parser):
         "--do_subtraction",
         type=bool,
         default=False,
-        help="When set to true, the LoTSS model will be subtracted from the DDF corrected data."
+        help="When set to true, the LoTSS model will be subtracted from the DDF corrected data.",
     )
 
 
@@ -1334,6 +1349,14 @@ def parse_arguments_linc(args: dict):
     elif args["parser_LINC"] == "target":
         args.pop("parser_LINC")
         print("Generating LINC Target config")
+        if args["output_fullres_data"]:
+            print("Full-resolution data requested, updating defaults to:")
+            print(f"{args['avg_timeresolution']} -> 1")
+            print(f"{args['avg_freqresolution']} -> 12.21kHz")
+            print(f"{args['filter_baselines']} -> *&")
+            args["avg_timeresolution"] = 1
+            args["avg_freqresolution"] = "12.21kHz"
+            args["filter_baselines"] = "*&"
         config = LINCJSONConfig(
             args["mspath"],
             prefac_h5parm=args["cal_solutions"],
