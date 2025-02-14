@@ -732,8 +732,7 @@ def add_arguments_linc_target(parser):
     )
     parser.add_argument(
         "--output_fullres_data",
-        type=eval_bool,
-        default=False,
+        action="store_true",
         help="Output the target data at full, unaveraged resolution. This is used, for example, for further VLBI-style processing.",
     )
     parser.add_argument(
