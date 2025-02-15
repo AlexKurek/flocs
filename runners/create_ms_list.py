@@ -732,8 +732,7 @@ def add_arguments_linc_target(parser):
     )
     parser.add_argument(
         "--output_fullres_data",
-        type=eval_bool,
-        default=False,
+        action="store_true",
         help="Output the target data at full, unaveraged resolution. This is used, for example, for further VLBI-style processing.",
     )
     parser.add_argument(
@@ -1351,9 +1350,9 @@ def parse_arguments_linc(args: dict):
         print("Generating LINC Target config")
         if args["output_fullres_data"]:
             print("Full-resolution data requested, updating defaults to:")
-            print(f"{args['avg_timeresolution']} -> 1")
-            print(f"{args['avg_freqresolution']} -> 12.21kHz")
-            print(f"{args['filter_baselines']} -> *&")
+            print(f"avg_timeresolution: {args['avg_timeresolution']} -> 1")
+            print(f"avg_freqresolution: {args['avg_freqresolution']} -> 12.21kHz")
+            print(f"filter_baselines: {args['filter_baselines']} -> *&")
             args["avg_timeresolution"] = 1
             args["avg_freqresolution"] = "12.21kHz"
             args["filter_baselines"] = "*&"
